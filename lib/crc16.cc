@@ -12,6 +12,7 @@ using v8::Number;
 using v8::Object;
 using v8::String;
 using v8::Value;
+using v8::NewStringType;
 using namespace node;
 
 typedef unsigned char U8;
@@ -67,7 +68,7 @@ void Main(const FunctionCallbackInfo<Value>& args) {
   Local<Value> ret = v8::Undefined(isolate);
 
   if(args[0]->IsObject()) {
-    Local<Object> bufferObj = args[0]->ToObject();
+    Local<Object> bufferObj = args[0].As<Object>();
     U8* bufferData = (U8*)Buffer::Data(bufferObj);
     int bufferLength = Buffer::Length(bufferObj);
 
@@ -75,13 +76,15 @@ void Main(const FunctionCallbackInfo<Value>& args) {
         ret = Number::New(isolate, GetCrc16(bufferData, bufferLength));
     } else {
         isolate->ThrowException(
-            Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments provided. Buffer required."))
+           Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments provided. Buffer required.",
+			                               NewStringType::kNormal).ToLocalChecked())
         );
         return;
     }
   } else {
     isolate->ThrowException(
-        Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments provided. Buffer required."))
+       Exception::TypeError(String::NewFromUtf8(isolate, "Invalid arguments provided. Buffer required.",
+		                                   NewStringType::kNormal).ToLocalChecked())
     );
     return;
   }
